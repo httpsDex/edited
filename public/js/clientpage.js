@@ -1,7 +1,7 @@
 // ====================== CLIENT PAGE JAVASCRIPT ======================
-// const apiBaseUrl = `http://localhost:1804`;
+const apiBaseUrl = `http://localhost:1804`;
 // const apiBaseUrl = "https://meritup-server.onrender.com";
-const apiBaseUrl = "https://edited-fif3.onrender.com";
+// const apiBaseUrl = "https://edited-fif3.onrender.com";
 
 // ====================== INITIALIZATION & AUTHENTICATION ======================
 
@@ -196,7 +196,7 @@ function updateActiveLink(activeLinkId) {
 
 
 // ====================== DATA LOADING FUNCTIONS ======================
-// All data loading functions now use getCurrentPeriod() from utils.js
+// All data loading functions use getCurrentPeriod() from utils.js
 
 // Load Dashboard Data
 // ====================== DASHBOARD FUNCTIONS ======================
@@ -205,7 +205,7 @@ async function loadDashboardData() {
     try {
         const periodId = getCurrentPeriod();
         
-        // Load all dashboard data in parallel (like adminpage)
+        // Load all dashboard data in parallel
         await Promise.all([
             loadEmployeeRecentActivity(periodId)
         ]);
@@ -384,7 +384,7 @@ async function loadTeachingSummaryData() {
         
         if (response.ok) {
             const data = await response.json();
-            populateTeachingSummaryTemplate(data);
+            await populateTeachingSummaryTemplate(data);
         } else {
             console.error("Failed to load teaching summary");
             showEmptyTeachingSummary();
@@ -395,7 +395,7 @@ async function loadTeachingSummaryData() {
     }
 }
 
-function populateTeachingSummaryTemplate(data) {
+async function populateTeachingSummaryTemplate(data) {
     // Employee Information
     document.getElementById('teaching_employee_name').textContent = data.employee_name || '-';
     document.getElementById('teaching_department').textContent = data.department_name || '-';
@@ -492,7 +492,7 @@ function populateTeachingSummaryTemplate(data) {
     document.getElementById('teaching_grand_total').textContent = grandTotal.toFixed(2);
     
     // Recommended Increase
-    const recommendedIncrease = calculateRecommendedIncrease(grandTotal);
+    const recommendedIncrease = await calculateRecommendedIncrease(grandTotal);
     const increaseElement = document.getElementById('recommendation_increase');
     if (increaseElement) {
         increaseElement.textContent = recommendedIncrease;
@@ -533,7 +533,7 @@ function showEmptyTeachingSummary() {
         }
     });
     
-    const increaseElement = document.getElementById('teaching_recommended_increase');
+    const increaseElement = document.getElementById('recommendation_increase');
     if (increaseElement) {
         increaseElement.textContent = 'No evaluation data available';
     }
@@ -556,21 +556,29 @@ function calculateAverage(val1, val2) {
 }
 
 // Helper function to calculate recommended increase
-function calculateRecommendedIncrease(totalPoints) {
-    if (totalPoints >= 46 && totalPoints <= 52) {
-        return '₱45.00/subject/month';
-    } else if (totalPoints >= 41 && totalPoints <= 45) {
-        return '₱28.00/subject/month';
-    } else if (totalPoints >= 36 && totalPoints <= 40) {
-        return '₱23.00/subject/month';
-    } else if (totalPoints >= 31 && totalPoints <= 35) {
-        return '₱18.00/subject/month';
-    } else if (totalPoints >= 26 && totalPoints <= 30) {
-        return '₱15.00/subject/month';
-    } else if (totalPoints < 26 && totalPoints > 0) {
-        return 'Not eligible for increase (Below 26 points)';
-    } else {
+async function calculateRecommendedIncrease(totalPoints) {
+    try {
+        const response = await fetch(`${apiBaseUrl}/api/merit-pay/calculate?totalPoints=${totalPoints}`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            if (data.inRange && data.payAmount > 0) {
+                return `₱${parseFloat(data.payAmount).toFixed(2)}`;
+            } else if (totalPoints > 0 && totalPoints < 26) {
+                return 'Not eligible for increase (Below 26 points)';
+            } else {
+                return 'No evaluation data available';
+            }
+        }
         return 'No evaluation data available';
+    } catch (error) {
+        console.error("Error calculating recommended increase:", error);
+        return 'Error calculating recommended increase';
     }
 }
 

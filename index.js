@@ -1278,7 +1278,7 @@ app.post("/api/non-teaching-evaluation/save", authenticate, requireRole(["Non-Te
                 excu_absences_without_pay, tardiness, minutes_late, seminar,
                 institutional_involvement, community_involvement, work_experience,
                 final_total_points
-            ], async (err, result) => {  // ⭐ Changed to async
+            ], async (err, result) => { 
                 if (err) {
                     console.error("Insert error:", err);
                     return res.status(500).json({ message: "Error creating evaluation" });
@@ -1286,7 +1286,7 @@ app.post("/api/non-teaching-evaluation/save", authenticate, requireRole(["Non-Te
                 
                 const newEvaluationId = result.insertId;
                 
-                // ⭐ ADD AUTO-CALCULATION HERE (INSERT PATH)
+                
                 const checkQuery = `
                     SELECT ep.semester, ep.year_id
                     FROM evaluation_periods ep
@@ -4232,11 +4232,11 @@ app.post("/api/certificates/submit", authenticate, requireRole(["Teaching Employ
     
     let points_value = 0;
     if (certificate_type === 'local') {
-        points_value = durationDays * 0.5; // 0.5 points per day for local
+        points_value = durationDays * 0.1; // 0.1 points per day for local
     } else if (certificate_type === 'regional') {
-        points_value = durationDays * 1.0; // 1 point per day for regional
+        points_value = durationDays * 0.3; // 0.3 point per day for regional
     } else if (certificate_type === 'national') {
-        points_value = durationDays * 1.5; // 1.5 points per day for national
+        points_value = durationDays * 0.5; // 0.5 points per day for national
     }
     
     // Max 3 points per certificate

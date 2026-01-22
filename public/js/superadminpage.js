@@ -1,14 +1,14 @@
 // ====================== SUPERADMIN PAGE JAVASCRIPT ======================
-// const apiBaseUrl = "http://localhost:1804";
+const apiBaseUrl = "http://localhost:1804";
 // const apiBaseUrl = "https://meritup-server.onrender.com";
-const apiBaseUrl = "https://edited-fif3.onrender.com";
+// const apiBaseUrl = "https://edited-fif3.onrender.com";
 
 // Main js for superadmin page
 document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("accessToken");
     const user = JSON.parse(localStorage.getItem("user"));
 
-    // Authentication checks - Note: You need to add role_id 5 for superadmin in database
+    // Authentication checks
     if (!token || !user) {
         window.location.href = "loginpage.html";
         return;
@@ -228,7 +228,7 @@ function filterUsers() {
     const rows = document.querySelectorAll('#usersTableBody tr');
     
     rows.forEach(row => {
-        if (row.cells.length === 1) return; // Skip "no data" row
+        if (row.cells.length === 1) return;
         
         const text = row.textContent.toLowerCase();
         const role = row.getAttribute('data-role');
@@ -505,6 +505,303 @@ async function deleteUser(userId, userName) {
 
 
 
+// // ====================== PERIOD MANAGEMENT ======================
+// async function loadAcademicYears() {
+//     try {
+//         const response = await fetch(`${apiBaseUrl}/api/superadmin/academic-years`, {
+//             headers: {
+//                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+//             }
+//         });
+
+//         if (response.ok) {
+//             const years = await response.json();
+//             displayAcademicYears(years);
+//         } else {
+//             document.getElementById("academicYearsTableBody").innerHTML = 
+//                 '<tr><td colspan="6" class="text-center text-danger">Failed to load academic years</td></tr>';
+//         }
+//     } catch (error) {
+//         console.error("Error loading academic years:", error);
+//         document.getElementById("academicYearsTableBody").innerHTML = 
+//             '<tr><td colspan="6" class="text-center text-danger">Error loading academic years</td></tr>';
+//     }
+// }
+
+// function displayAcademicYears(years) {
+//     const tbody = document.getElementById("academicYearsTableBody");
+    
+//     if (years.length === 0) {
+//         tbody.innerHTML = '<tr><td colspan="6" class="text-center">No academic years found</td></tr>';
+//         return;
+//     }
+
+//     tbody.innerHTML = years.map(year => `
+//         <tr>
+//             <td>${year.year_id}</td>
+//             <td><strong>${year.year_code}</strong></td>
+//             <td>${year.start_year}</td>
+//             <td>${year.end_year}</td>
+//             <td>${getStatusBadge(year.status)}</td>
+//             <td>
+//                 <button class="btn btn-sm btn-primary" onclick="updateYearStatus(${year.year_id}, '${year.year_code}')" title="Change Status">
+//                     <i class="fas fa-exchange-alt"></i>
+//                 </button>
+//             </td>
+//         </tr>
+//     `).join('');
+// }
+
+// async function loadEvaluationPeriods() {
+//     try {
+//         const response = await fetch(`${apiBaseUrl}/api/superadmin/evaluation-periods`, {
+//             headers: {
+//                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+//             }
+//         });
+
+//         if (response.ok) {
+//             const periods = await response.json();
+//             displayEvaluationPeriods(periods);
+//         } else {
+//             document.getElementById("periodsTableBody").innerHTML = 
+//                 '<tr><td colspan="8" class="text-center text-danger">Failed to load evaluation periods</td></tr>';
+//         }
+//     } catch (error) {
+//         console.error("Error loading evaluation periods:", error);
+//         document.getElementById("periodsTableBody").innerHTML = 
+//             '<tr><td colspan="8" class="text-center text-danger">Error loading evaluation periods</td></tr>';
+//     }
+// }
+
+// function displayEvaluationPeriods(periods) {
+//     const tbody = document.getElementById("periodsTableBody");
+    
+//     if (periods.length === 0) {
+//         tbody.innerHTML = '<tr><td colspan="8" class="text-center">No evaluation periods found</td></tr>';
+//         return;
+//     }
+
+//     tbody.innerHTML = periods.map(period => `
+//         <tr>
+//             <td>${period.period_id}</td>
+//             <td><strong>${period.period_name}</strong></td>
+//             <td>${period.academic_year}</td>
+//             <td><span class="badge bg-info">${period.semester}</span></td>
+//             <td>${formatDate(period.start_date)}</td>
+//             <td>${formatDate(period.end_date)}</td>
+//             <td>${getStatusBadge(period.status)}</td>
+//             <td>
+//                 <button class="btn btn-sm btn-primary" onclick="updatePeriodStatus(${period.period_id}, '${period.period_name}')" title="Change Status">
+//                     <i class="fas fa-exchange-alt"></i>
+//                 </button>
+//             </td>
+//         </tr>
+//     `).join('');
+// }
+
+// function getStatusBadge(status) {
+//     const colors = {
+//         'active': 'success',
+//         'completed': 'secondary',
+//         'upcoming': 'warning'
+//     };
+//     return `<span class="badge bg-${colors[status] || 'secondary'}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+// }
+
+// // ====================== ADD ACADEMIC YEAR ======================
+// function openAddAcademicYearModal() {
+//     document.getElementById("addAcademicYearForm").reset();
+//     const modal = new bootstrap.Modal(document.getElementById("addAcademicYearModal"));
+//     modal.show();
+// }
+
+// async function submitAddAcademicYear() {
+//     const form = document.getElementById("addAcademicYearForm");
+//     if (!form.checkValidity()) {
+//         form.reportValidity();
+//         return;
+//     }
+
+//     const startYear = parseInt(document.getElementById("addStartYear").value);
+//     const endYear = parseInt(document.getElementById("addEndYear").value);
+
+//     if (endYear !== startYear + 1) {
+//         alert("End year must be exactly one year after start year");
+//         return;
+//     }
+
+//     const yearData = {
+//         startYear: startYear,
+//         endYear: endYear,
+//         status: document.getElementById("addYearStatus").value
+//     };
+
+//     try {
+//         const response = await fetch(`${apiBaseUrl}/api/superadmin/academic-years`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+//             },
+//             body: JSON.stringify(yearData)
+//         });
+
+//         if (response.ok) {
+//             const modal = bootstrap.Modal.getInstance(document.getElementById("addAcademicYearModal"));
+//             modal.hide();
+//             showToast("Academic year added successfully!");
+//             await loadAcademicYears();
+//         } else {
+//             const error = await response.json();
+//             alert(error.error || "Failed to add academic year");
+//         }
+//     } catch (error) {
+//         console.error("Error adding academic year:", error);
+//         alert("Error adding academic year");
+//     }
+// }
+
+// async function updateYearStatus(yearId, yearCode) {
+//     const newStatus = prompt(`Change status for ${yearCode}:\n\nEnter new status (active, completed, or upcoming):`);
+    
+//     if (!newStatus) return;
+    
+//     const validStatuses = ['active', 'completed', 'upcoming'];
+//     if (!validStatuses.includes(newStatus.toLowerCase())) {
+//         alert("Invalid status. Please enter: active, completed, or upcoming");
+//         return;
+//     }
+
+//     try {
+//         const response = await fetch(`${apiBaseUrl}/api/superadmin/academic-years/${yearId}/status`, {
+//             method: "PUT",
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+//             },
+//             body: JSON.stringify({ status: newStatus.toLowerCase() })
+//         });
+
+//         if (response.ok) {
+//             showToast("Academic year status updated!");
+//             await loadAcademicYears();
+//             await loadDashboardStats();
+//         } else {
+//             const error = await response.json();
+//             alert(error.error || "Failed to update status");
+//         }
+//     } catch (error) {
+//         console.error("Error updating year status:", error);
+//         alert("Error updating year status");
+//     }
+// }
+
+// // ====================== ADD EVALUATION PERIOD ======================
+// async function openAddPeriodModal() {
+//     // Load academic years for dropdown
+//     try {
+//         const response = await fetch(`${apiBaseUrl}/api/superadmin/academic-years`, {
+//             headers: {
+//                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+//             }
+//         });
+
+//         if (response.ok) {
+//             const years = await response.json();
+//             const select = document.getElementById("addPeriodYear");
+//             select.innerHTML = '<option value="">Select Academic Year</option>' + 
+//                 years.map(year => `<option value="${year.year_id}">${year.year_code}</option>`).join('');
+//         }
+//     } catch (error) {
+//         console.error("Error loading academic years:", error);
+//     }
+
+//     document.getElementById("addPeriodForm").reset();
+//     const modal = new bootstrap.Modal(document.getElementById("addPeriodModal"));
+//     modal.show();
+// }
+
+// async function submitAddPeriod() {
+//     const form = document.getElementById("addPeriodForm");
+//     if (!form.checkValidity()) {
+//         form.reportValidity();
+//         return;
+//     }
+
+//     const periodData = {
+//         yearId: parseInt(document.getElementById("addPeriodYear").value),
+//         semester: document.getElementById("addPeriodSemester").value,
+//         periodName: document.getElementById("addPeriodName").value,
+//         startDate: document.getElementById("addPeriodStartDate").value,
+//         endDate: document.getElementById("addPeriodEndDate").value,
+//         status: document.getElementById("addPeriodStatus").value
+//     };
+
+//     try {
+//         const response = await fetch(`${apiBaseUrl}/api/superadmin/evaluation-periods`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+//             },
+//             body: JSON.stringify(periodData)
+//         });
+
+//         if (response.ok) {
+//             const modal = bootstrap.Modal.getInstance(document.getElementById("addPeriodModal"));
+//             modal.hide();
+//             showToast("Evaluation period added successfully!");
+//             await loadEvaluationPeriods();
+//         } else {
+//             const error = await response.json();
+//             alert(error.error || "Failed to add evaluation period");
+//         }
+//     } catch (error) {
+//         console.error("Error adding evaluation period:", error);
+//         alert("Error adding evaluation period");
+//     }
+// }
+
+// async function updatePeriodStatus(periodId, periodName) {
+//     const newStatus = prompt(`Change status for "${periodName}":\n\nEnter new status (upcoming, active, or completed):`);
+    
+//     if (!newStatus) return;
+
+//     const validStatuses = ['upcoming', 'active', 'completed'];
+//     if (!validStatuses.includes(newStatus.toLowerCase())) {
+//         alert("Invalid status. Please enter: upcoming, active, or completed");
+//         return;
+//     }
+
+//     try {
+//         const response = await fetch(`${apiBaseUrl}/api/superadmin/evaluation-periods/${periodId}/status`, {
+//             method: "PUT",
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+//             },
+//             body: JSON.stringify({ status: newStatus.toLowerCase() })
+//         });
+
+//         if (response.ok) {
+//             showToast("Evaluation period status updated!");
+//             await loadEvaluationPeriods();
+//             await loadDashboardStats();
+//         } else {
+//             const error = await response.json();
+//             alert(error.error || "Failed to update status");
+//         }
+//     } catch (error) {
+//         console.error("Error updating period status:", error);
+//         alert("Error updating period status");
+//     }
+// }
+
+
+
+
+
 // ====================== PERIOD MANAGEMENT ======================
 async function loadAcademicYears() {
     try {
@@ -544,9 +841,17 @@ function displayAcademicYears(years) {
             <td>${year.end_year}</td>
             <td>${getStatusBadge(year.status)}</td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="updateYearStatus(${year.year_id}, '${year.year_code}')" title="Change Status">
-                    <i class="fas fa-exchange-alt"></i>
-                </button>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false" title="Change Status">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="changeYearStatus(${year.year_id}, 'active')">Set as Active</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changeYearStatus(${year.year_id}, 'completed')">Set as Completed</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changeYearStatus(${year.year_id}, 'upcoming')">Set as Upcoming</a></li>
+                    </ul>
+                </div>
             </td>
         </tr>
     `).join('');
@@ -592,9 +897,17 @@ function displayEvaluationPeriods(periods) {
             <td>${formatDate(period.end_date)}</td>
             <td>${getStatusBadge(period.status)}</td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="updatePeriodStatus(${period.period_id}, '${period.period_name}')" title="Change Status">
-                    <i class="fas fa-exchange-alt"></i>
-                </button>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false" title="Change Status">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="changePeriodStatus(${period.period_id}, 'active')">Set as Active</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changePeriodStatus(${period.period_id}, 'completed')">Set as Completed</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changePeriodStatus(${period.period_id}, 'upcoming')">Set as Upcoming</a></li>
+                    </ul>
+                </div>
             </td>
         </tr>
     `).join('');
@@ -662,14 +975,8 @@ async function submitAddAcademicYear() {
     }
 }
 
-async function updateYearStatus(yearId, yearCode) {
-    const newStatus = prompt(`Change status for ${yearCode}:\n\nEnter new status (active, completed, or upcoming):`);
-    
-    if (!newStatus) return;
-    
-    const validStatuses = ['active', 'completed', 'upcoming'];
-    if (!validStatuses.includes(newStatus.toLowerCase())) {
-        alert("Invalid status. Please enter: active, completed, or upcoming");
+async function changeYearStatus(yearId, newStatus) {
+    if (!confirm(`Are you sure you want to change the status to "${newStatus}"?`)) {
         return;
     }
 
@@ -763,14 +1070,8 @@ async function submitAddPeriod() {
     }
 }
 
-async function updatePeriodStatus(periodId, periodName) {
-    const newStatus = prompt(`Change status for "${periodName}":\n\nEnter new status (upcoming, active, or completed):`);
-    
-    if (!newStatus) return;
-
-    const validStatuses = ['upcoming', 'active', 'completed'];
-    if (!validStatuses.includes(newStatus.toLowerCase())) {
-        alert("Invalid status. Please enter: upcoming, active, or completed");
+async function changePeriodStatus(periodId, newStatus) {
+    if (!confirm(`Are you sure you want to change the status to "${newStatus}"?`)) {
         return;
     }
 
