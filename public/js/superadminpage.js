@@ -1,7 +1,7 @@
 // ====================== SUPERADMIN PAGE JAVASCRIPT ======================
-const apiBaseUrl = "http://localhost:1804";
+// const apiBaseUrl = "http://localhost:1804";
 // const apiBaseUrl = "https://meritup-server.onrender.com";
-// const apiBaseUrl = "https://edited-fif3.onrender.com";
+const apiBaseUrl = "https://edited-fif3.onrender.com";
 
 // Main js for superadmin page
 document.addEventListener("DOMContentLoaded", () => {
@@ -1410,4 +1410,5 @@ function logout() {
         localStorage.removeItem("user");
         window.location.href = "loginpage.html";
     }
+
 }
